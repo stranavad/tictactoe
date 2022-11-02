@@ -6,7 +6,7 @@
 </script>
 
 <template>
-  <Squares :rows="25" :cols="25"/>
+  <Squares :rows="15" :cols="15"/>
 </template>
 
 

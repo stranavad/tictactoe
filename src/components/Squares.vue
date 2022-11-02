@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import {ref, onMounted, reactive} from 'vue'
+import {ref, onMounted, reactive, computed} from 'vue'
 import Square from './Square.vue'
+import Symbol from "./Symbol.vue";
 
 const {rows, cols} = defineProps<{rows: number, cols: number}>()
 
@@ -8,6 +9,9 @@ const {rows, cols} = defineProps<{rows: number, cols: number}>()
 const activeIndex = reactive({line: -1, item: -1})
 
   const setBoard = () => {
+  count.value = 0;
+  activeIndex.line = -1;
+  activeIndex.item = -1;
     count.value = 0;
     items.value = [];
     for(let i=0; i<rows; i++){
@@ -150,11 +154,25 @@ const activeIndex = reactive({line: -1, item: -1})
     const items = ref<number[][]>([])
     const count = ref(0)
 
+    const currentlyPlaying = computed(() => {
+      if(!count.value){
+        return 1;
+      }
+      return count.value % 2 ? 2 : 1;
+    })
+
 
 </script>
 
 <template>
   <div class="main-container">
+    <div class="toolbox">
+      <div class="playing">
+        <span>Playing:</span>
+        <Symbol :value="currentlyPlaying"/>
+      </div>
+      <button @click="setBoard">CLEAR BOARD</button>
+    </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
         <div v-for="(item, itemIndex) in line">
@@ -168,15 +186,53 @@ const activeIndex = reactive({line: -1, item: -1})
 <style scoped>
 
 .main-container {
-  width: 100vw;
-  height: 100vw;
-  overflow: scroll;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-    .line-container{
-    display: flex;
-    flex-direction: column;
-    }
+.toolbox {
+  width: 90vw;
+  margin-bottom: 50px;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff22;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.toolbox span {
+  font-family: Helvetica;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.playing {
+  display: flex;
+  align-items: center;
+}
+
+.toolbox button {
+  font-family: Helvetica;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: bold;
+  color: white;
+}
+
+.line-container{
+  display: flex;
+  flex-direction: column;
+  height: 90vw;
+  width: 90vw;
+  overflow: scroll;
+  border: 3px solid white;
+}
 
     .line{
     display: flex;
