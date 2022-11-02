@@ -19,6 +19,10 @@ const activeIndex = reactive({line: -1, item: -1})
 
 
     const onSquareClick = (line: number, item: number) => {
+        if(activeIndex.line === line && activeIndex.item === item){
+            onSecondClick(line, item)
+        }
+
         activeIndex.line = line
         activeIndex.item = item
     }
@@ -65,6 +69,7 @@ const activeIndex = reactive({line: -1, item: -1})
 
         if(str.includes(generateWin(symbol))){
             alert("WINNNNNNN");
+            
         }
     }
 
