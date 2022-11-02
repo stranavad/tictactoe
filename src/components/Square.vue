@@ -1,27 +1,25 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import {reactive,  watch} from 'vue'
 
-const {value, active} = defineProps<{ value: number, active: boolean}>()
+const {value, activeIndex, currentIndex} = defineProps<{ value: number, activeIndex: {line: number, item: number}, currentIndex: {line: number, item: number}}>()
 
 const emit = defineEmits(['trigger'])
+const isActive = reactive({active: false})
 
-watch(() => active, () => {
-    console.log(active)
+watch(() => `${activeIndex.item}|${activeIndex.line}`, () => {
+  isActive.active = activeIndex.item === currentIndex.item && activeIndex.line === currentIndex.line;
 })
 
 const onClick = () => {
     emit("trigger")
 }
 
-const count = ref(0)
-
-
 </script>
 
 
 
 <template>
-    <div class="square-div" @click="onClick">{{value}}</div>
+    <div :class="{'square-div': true,'active': isActive.active}" @click="onClick">{{value}}</div>
 </template>
 
 <style scoped>
@@ -32,5 +30,9 @@ const count = ref(0)
     display: flex;
     justify-content: center;
     align-items: center;
+
+}
+.active {
+  background-color: yellow;
 }
 </style>

@@ -21,8 +21,6 @@ const activeIndex = reactive({line: -1, item: -1})
     const onSquareClick = (line: number, item: number) => {
         activeIndex.line = line
         activeIndex.item = item
-
-        
     }
 
 
@@ -147,7 +145,7 @@ const activeIndex = reactive({line: -1, item: -1})
     <div class="line-container">
         <div v-for="(line, lineIndex) in items" class="line">
             <div v-for="(item, itemIndex) in line">
-                <Square :value="item" :active="activeIndex.line === lineIndex && activeIndex.item === itemIndex" @trigger="onSquareClick(lineIndex, itemIndex)"/>
+                <Square :value="item" :activeIndex="activeIndex" :currentIndex="{line: lineIndex, item: itemIndex}" @trigger="onSquareClick(lineIndex, itemIndex)"/>
             </div>
         </div>
     </div>
