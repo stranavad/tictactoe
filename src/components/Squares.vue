@@ -7,15 +7,23 @@ const {rows, cols} = defineProps<{rows: number, cols: number}>()
 
 const activeIndex = reactive({line: -1, item: -1})
 
-  onMounted( () => {
+  const setBoard = () => {
+    count.value = 0;
+    items.value = [];
     for(let i=0; i<rows; i++){
-        let array = [];
+      let array = [];
       for(let j=0; j<cols; j++){
         array.push(0)
       }
       items.value.push(array)
     }
-  })
+  }
+
+  onMounted(setBoard)
+
+  const isActive = (line: number, item: number): boolean => {
+    return activeIndex.line === line && activeIndex.item === item;
+  }
 
 
     const onSquareClick = (line: number, item: number) => {
@@ -112,31 +120,31 @@ const activeIndex = reactive({line: -1, item: -1})
     }
 
     const checkDiagonalRight = (l: number, i: number, symbol: number=1) => {
-    const firstIndex = {
-        line: l - Math.min(l, items.value[0].length - 1),
-        item: i + Math.min(l, items.value[0].length - 1)
-    }
+        const firstIndex = {
+            line: l - Math.min(l, items.value[0].length - 1),
+            item: i + Math.min(l, items.value[0].length - 1)
+        }
 
-    if(l > 3 && items.value[0].length - 3 > 3){
-        firstIndex.line = l - 4;
-        firstIndex.item = i + 4;
-    }
+        if(l > 3 && items.value[0].length - 3 > 3){
+            firstIndex.line = l - 4;
+            firstIndex.item = i + 4;
+        }
 
-    const lastIndex = {
-        line: l + Math.min(i, items.value.length - l),
-        item: i - Math.min(i, items.value.length - l),
-    }
+        const lastIndex = {
+            line: l + Math.min(i, items.value.length - l),
+            item: i - Math.min(i, items.value.length - l),
+        }
 
-    if(i > 3 && items.value.length - l > 3){
-        lastIndex.line = l + 4;
-        lastIndex.item = i - 4;
-    }
+        if(i > 3 && items.value.length - l > 3){
+            lastIndex.line = l + 4;
+            lastIndex.item = i - 4;
+        }
 
-    let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
-    if(str.includes(generateWin(symbol))){
-        alert("WINNNNNNN")
+        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
+        if(str.includes(generateWin(symbol))){
+            alert("WINNNNNNN")
+        }
     }
-}
 
 
     const items = ref<number[][]>([])
@@ -146,18 +154,24 @@ const activeIndex = reactive({line: -1, item: -1})
 </script>
 
 <template>
-
+  <div class="main-container">
     <div class="line-container">
-        <div v-for="(line, lineIndex) in items" class="line">
-            <div v-for="(item, itemIndex) in line">
-                <Square :value="item" :activeIndex="activeIndex" :currentIndex="{line: lineIndex, item: itemIndex}" @trigger="onSquareClick(lineIndex, itemIndex)"/>
-            </div>
+      <div v-for="(line, lineIndex) in items" class="line">
+        <div v-for="(item, itemIndex) in line">
+          <Square :value="item" :active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)"/>
         </div>
+      </div>
     </div>
-
+  </div>
 </template>
 
 <style scoped>
+
+.main-container {
+  width: 100vw;
+  height: 100vw;
+  overflow: scroll;
+}
 
     .line-container{
     display: flex;

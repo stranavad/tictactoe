@@ -1,28 +1,20 @@
 <script setup lang="ts">
-import {reactive,  watch} from 'vue'
-
-const {value, activeIndex, currentIndex} = defineProps<{ value: number, activeIndex: {line: number, item: number}, currentIndex: {line: number, item: number}}>()
+const {value, active} = defineProps<{ value: number, active: boolean}>()
 
 const emit = defineEmits(['trigger'])
-const isActive = reactive({active: false})
-
-watch(() => `${activeIndex.item}|${activeIndex.line}`, () => {
-  isActive.active = activeIndex.item === currentIndex.item && activeIndex.line === currentIndex.line;
-})
 
 const onClick = () => {
+    if(value){
+      return;
+    }
     emit("trigger")
 }
-
-
-
-
 </script>
 
 
 
 <template>
-    <div :class="{'square-div': true,'active': isActive.active}" @click="onClick">
+    <div :class="{'square-div': true,'active': active}" @click="onClick">
         <div v-if="value === 1" class="circle"></div>
         <div v-if="value === 2" class="cross"></div>
     </div>
