@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const {value, active} = defineProps<{ value: number, active: boolean}>()
 import Symbol from './Symbol.vue';
+const {value, active} = defineProps<{ value: number, active: boolean}>()
 
 const emit = defineEmits(['trigger'])
 
