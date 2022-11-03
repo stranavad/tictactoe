@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import {ref, onMounted, reactive} from 'vue'
+import {ref, onMounted, reactive, computed} from 'vue'
 import Square from './Square.vue'
+import Symbol from "./Symbol.vue";
 
 const {rows, cols} = defineProps<{rows: number, cols: number}>()
 
@@ -8,6 +9,10 @@ const {rows, cols} = defineProps<{rows: number, cols: number}>()
 const activeIndex = reactive({line: -1, item: -1})
 
   const setBoard = () => {
+    won.value = false;
+    count.value = 0;
+    activeIndex.line = -1;
+    activeIndex.item = -1;
     count.value = 0;
     items.value = [];
     for(let i=0; i<rows; i++){
@@ -47,10 +52,28 @@ const activeIndex = reactive({line: -1, item: -1})
             items.value[line][item] = 2
         }
 
-        checkHorizontal(line, item, items.value[line][item])
-        checkVertical(line, item, items.value[line][item])
-        checkDiagonalLeft(line, item, items.value[line][item])
-        checkDiagonalRight(line, item, items.value[line][item])
+        if(checkHorizontal(line, item, items.value[line][item])){
+
+          won.value = true;
+          return;
+        }
+
+
+        if(checkVertical(line, item, items.value[line][item])){
+          won.value = true;
+          return;
+        }
+
+
+        if(checkDiagonalLeft(line, item, items.value[line][item])){
+          won.value = true;
+          return;
+        }
+
+        if(checkDiagonalRight(line, item, items.value[line][item])){
+          won.value = true;
+          return;
+        }
     }
 
 
@@ -74,11 +97,7 @@ const activeIndex = reactive({line: -1, item: -1})
         }
 
         let str = items.value[line].slice(firstIndex, secIndex + 1).join("")
-
-        if(str.includes(generateWin(symbol))){
-            alert("WINNNNNNN");
-            
-        }
+        return str.includes(generateWin(symbol))
     }
 
     const checkVertical = (line: number, item: number, symbol: number) => {
@@ -93,10 +112,7 @@ const activeIndex = reactive({line: -1, item: -1})
         }
 
         let str = items.value.slice(firstIndex, secIndex + 1).map((array) => array[item]).join("")
-
-        if(str.includes(generateWin(symbol))){
-            alert("WINNNNN")
-        }        
+        return str.includes(generateWin(symbol))
     }
 
     const checkDiagonalLeft = (l: number, i: number, symbol:number=1) => {
@@ -114,12 +130,10 @@ const activeIndex = reactive({line: -1, item: -1})
         }
 
         let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item]).join("");
-        if(str.includes(generateWin(symbol))){
-            alert("WINNNNNNN")
-        }
+        return str.includes(generateWin(symbol))
     }
 
-    const checkDiagonalRight = (l: number, i: number, symbol: number=1) => {
+    const checkDiagonalRight = (l: number, i: number, symbol: number=1): boolean => {
         const firstIndex = {
             line: l - Math.min(l, items.value[0].length - 1),
             item: i + Math.min(l, items.value[0].length - 1)
@@ -141,20 +155,37 @@ const activeIndex = reactive({line: -1, item: -1})
         }
 
         let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
-        if(str.includes(generateWin(symbol))){
-            alert("WINNNNNNN")
-        }
+        return str.includes(generateWin(symbol))
     }
 
 
     const items = ref<number[][]>([])
     const count = ref(0)
+    const won = ref(false);
+
+    const currentlyPlaying = computed(() => {
+      if(!count.value){
+        return 1;
+      }
+      return count.value % 2 ? 2 : 1;
+    })
 
 
 </script>
 
 <template>
+  <div v-if="won" class="win-container">
+    <h3>You've won</h3>
+    <button @click="setBoard">New game</button>
+  </div>
   <div class="main-container">
+    <div class="toolbox">
+      <div class="playing">
+        <span>Playing:</span>
+        <Symbol :value="currentlyPlaying" :active="false"/>
+      </div>
+      <button @click="setBoard">CLEAR BOARD</button>
+    </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
         <div v-for="(item, itemIndex) in line">
@@ -168,15 +199,80 @@ const activeIndex = reactive({line: -1, item: -1})
 <style scoped>
 
 .main-container {
-  width: 100vw;
-  height: 100vw;
-  overflow: scroll;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-    .line-container{
-    display: flex;
-    flex-direction: column;
-    }
+.win-container {
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #242424;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.win-container h3 {
+  margin-bottom: 50px;
+  font-size: 36px;
+}
+
+.win-container button {
+  cursor: pointer;
+  padding: 10px;
+  background-color: #ffffff22;
+  border-radius: 8px;
+  border: none;
+}
+
+.toolbox {
+  width: 90vw;
+  margin-bottom: 50px;
+  display: flex;
+  justify-content: space-between;
+  background-color: #ffffff22;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.toolbox span {
+  font-family: Helvetica;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+.playing {
+  display: flex;
+  align-items: center;
+}
+
+.toolbox button {
+  font-family: Helvetica;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: bold;
+  color: white;
+}
+
+.line-container{
+  display: flex;
+  flex-direction: column;
+  height: 90vw;
+  width: 90vw;
+  overflow: scroll;
+  border: 3px solid white;
+}
 
     .line{
     display: flex;
