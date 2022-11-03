@@ -182,7 +182,7 @@ const activeIndex = reactive({line: -1, item: -1})
     <div class="toolbox">
       <div class="playing">
         <span>Playing:</span>
-        <Symbol :value="currentlyPlaying"/>
+        <Symbol :value="currentlyPlaying" :active="false"/>
       </div>
       <button @click="setBoard">CLEAR BOARD</button>
     </div>
