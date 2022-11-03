@@ -4,16 +4,24 @@ import Square from './Square.vue'
 import Symbol from "./Symbol.vue";
 
 const {rows, cols} = defineProps<{rows: number, cols: number}>()
-
+const score = reactive({1: 0, 2: 0});
+const players = ref([1, 2]);
+const plays = ref(0);
 
 const activeIndex = reactive({line: -1, item: -1})
 
-  const setBoard = () => {
+  const setBoard = (clearScore: boolean=false) => {
+    if(clearScore){
+      count.value = 0;
+      plays.value = 0;
+      score[1] = 0;
+      score[2] = 0;
+    }
     won.value = false;
-    count.value = 0;
+    count.value = plays.value % 2;
     activeIndex.line = -1;
     activeIndex.item = -1;
-    count.value = 0;
+    // count.value = 0;
     items.value = [];
     for(let i=0; i<rows; i++){
       let array = [];
@@ -45,35 +53,36 @@ const activeIndex = reactive({line: -1, item: -1})
         if(items.value[line][item]){
             return
         }
+
         count.value++
         if(count.value % 2 === 1){
             items.value[line][item] = 1
         } else{
             items.value[line][item] = 2
         }
+        const symbol: number = items.value[line][item];
 
-        if(checkHorizontal(line, item, items.value[line][item])){
-
+        if(checkWin(line, item, symbol)){
+          score[symbol === 1 ? 1 : 2]++;
           won.value = true;
-          return;
+          plays.value++;
         }
+    }
 
+    const checkWin = (line: number, item: number, symbol: number) => {
+      if(checkHorizontal(line, item, symbol)){
+        return true;
+      }
 
-        if(checkVertical(line, item, items.value[line][item])){
-          won.value = true;
-          return;
-        }
+      if(checkVertical(line, item, symbol)){
+        return true;
+      }
 
+      if(checkDiagonalLeft(line, item, symbol)){
+        return true;
+      }
 
-        if(checkDiagonalLeft(line, item, items.value[line][item])){
-          won.value = true;
-          return;
-        }
-
-        if(checkDiagonalRight(line, item, items.value[line][item])){
-          won.value = true;
-          return;
-        }
+      return checkDiagonalRight(line, item, symbol)
     }
 
 
@@ -176,15 +185,16 @@ const activeIndex = reactive({line: -1, item: -1})
 <template>
   <div v-if="won" class="win-container">
     <h3>You've won</h3>
-    <button @click="setBoard">New game</button>
+    <button @click="setBoard(false)">New game</button>
   </div>
   <div class="main-container">
     <div class="toolbox">
       <div class="playing">
         <span>Playing:</span>
-        <Symbol :value="currentlyPlaying" :active="false"/>
+        <Symbol :value="currentlyPlaying" :active="false" :size="'small'"/>
       </div>
-      <button @click="setBoard">CLEAR BOARD</button>
+      <div class="score"><Symbol :value="1" :size="'small'"/><text class="score-text">{{score[1]}} - {{score[2]}}</text><Symbol :value="2" :size="'small'"/></div>
+      <button @click="setBoard(true)">CLEAR BOARD</button>
     </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
@@ -197,6 +207,19 @@ const activeIndex = reactive({line: -1, item: -1})
 </template>
 
 <style scoped>
+
+.score {
+  display: flex;
+  /*align-items: first;*/
+}
+
+.score-text {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  font-weight: bolder;
+  line-height: 1em;
+}
 
 .main-container {
   width: 100%;
@@ -248,7 +271,7 @@ const activeIndex = reactive({line: -1, item: -1})
 .toolbox span {
   font-family: Helvetica;
   font-weight: bold;
-  margin-right: 15px;
+  margin-right: 5px;
 }
 
 .playing {
