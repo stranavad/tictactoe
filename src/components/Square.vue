@@ -16,7 +16,7 @@ const onClick = () => {
 
 <template>
     <div :class="{'square-div': true,'active': active}" @click="onClick">
-      <Symbol :value="value"/>
+      <Symbol :value="value" :active="active"/>
     </div>
 </template>
 
@@ -31,6 +31,6 @@ const onClick = () => {
 
     }
     .active {
-    background-color: yellow;
+      background-color: #ffffffcc;
     }
 </style>
