@@ -7,6 +7,7 @@ const {rows, cols} = defineProps<{rows: number, cols: number}>()
 const score = reactive({1: 0, 2: 0});
 const players = ref([1, 2]);
 const plays = ref(0);
+const winningIndexes = ref<[number, number][]>([])
 
 const activeIndex = reactive({line: -1, item: -1})
 
@@ -39,6 +40,25 @@ const activeIndex = reactive({line: -1, item: -1})
   }
 
 
+    const getHorizontalIndexes = (line: number, item:number, symbol: number) => {
+        let firstIndex = 0;
+        let secIndex = items.value[line].length
+
+        if(item > 3){
+            firstIndex = item - 4;
+        }
+        if(items.value[line].length > item + 4){
+            secIndex = item + 4;
+        }
+
+        let indexes = items.value[line].slice(firstIndex, secIndex + 1).map((_, index) => index + firstIndex)
+    
+        let str = items.value[line].slice(firstIndex, secIndex + 1).join("").indexOf(generateWin(symbol))
+        
+        winningIndexes.value = indexes.splice(str, str + 5).map(item => [line, item]) 
+        console.log(winningIndexes)
+    }
+
     const onSquareClick = (line: number, item: number) => {
         if(activeIndex.line === line && activeIndex.item === item){
             onSecondClick(line, item)
@@ -47,6 +67,8 @@ const activeIndex = reactive({line: -1, item: -1})
         activeIndex.line = line
         activeIndex.item = item
     }
+
+
 
 
     const onSecondClick = (line:number, item: number) => {
@@ -62,27 +84,37 @@ const activeIndex = reactive({line: -1, item: -1})
         }
         const symbol: number = items.value[line][item];
 
-        if(checkWin(line, item, symbol)){
-          score[symbol === 1 ? 1 : 2]++;
-          won.value = true;
-          plays.value++;
+        const winData = checkWin(line, item, symbol);
+
+        if(!winData){
+            return;
         }
+
+        score[symbol === 1 ? 1 : 2]++;
+        getHorizontalIndexes(line, item, symbol);
+        // won.value = true;
+        plays.value++;
     }
 
-    const checkWin = (line: number, item: number, symbol: number) => {
+    const checkWin = (line: number, item: number, symbol: number): string | null => {
       if(checkHorizontal(line, item, symbol)){
-        return true;
+        return "horizontal";
       }
 
       if(checkVertical(line, item, symbol)){
-        return true;
+        return "vertical";
       }
 
       if(checkDiagonalLeft(line, item, symbol)){
-        return true;
+        return "diagonalLeft";
       }
 
-      return checkDiagonalRight(line, item, symbol)
+      if(checkDiagonalRight(line, item, symbol)){
+        return "diagonalRight";
+      }
+      else{
+        return null;
+      }
     }
 
 
@@ -111,7 +143,7 @@ const activeIndex = reactive({line: -1, item: -1})
 
     const checkVertical = (line: number, item: number, symbol: number) => {
         let firstIndex = 0;
-        let secIndex = items.value.length;
+        let secIndex = items.value.length; 
 
         if(line > 3){
             firstIndex = line - 4;
@@ -199,7 +231,7 @@ const activeIndex = reactive({line: -1, item: -1})
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
         <div v-for="(item, itemIndex) in line">
-          <Square :value="item" :active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)"/>
+          <Square :value="item" :active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)" :won="winningIndexes.includes([lineIndex, itemIndex])" :rotation="45"/>
         </div>
       </div>
     </div>
@@ -210,7 +242,6 @@ const activeIndex = reactive({line: -1, item: -1})
 
 .score {
   display: flex;
-  /*align-items: first;*/
 }
 
 .score-text {
