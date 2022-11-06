@@ -1,22 +1,21 @@
-<script setup lang="ts">
+<script setup>
 import {ref, onMounted, reactive, computed} from 'vue'
 import Square from './Square.vue'
 import Symbol from "./Symbol.vue";
 
-const {rows, cols} = defineProps<{rows: number, cols: number}>()
+const {rows, cols} = defineProps(['rows', 'cols'])
 const score = reactive({1: 0, 2: 0});
 const players = ref([1, 2]);
 const plays = ref(0);
-const winningIndexes = ref<[number, number][]>([])
 
 const activeIndex = reactive({line: -1, item: -1})
 
-  const setBoard = (clearScore: boolean=false) => {
+  const setBoard = (clearScore) => {
     if(clearScore){
-      count.value = 0;
-      plays.value = 0;
-      score[1] = 0;
-      score[2] = 0;
+      count.value = {};
+      plays.value = {};
+      score[1] = {};
+      score[2] = {};
     }
     won.value = false;
     count.value = plays.value % 2;
@@ -27,7 +26,7 @@ const activeIndex = reactive({line: -1, item: -1})
     for(let i=0; i<rows; i++){
       let array = [];
       for(let j=0; j<cols; j++){
-        array.push(0)
+        array.push({value: 0, active: false, won: false, rotation: 45})
       }
       items.value.push(array)
     }
@@ -35,12 +34,12 @@ const activeIndex = reactive({line: -1, item: -1})
 
   onMounted(setBoard)
 
-  const isActive = (line: number, item: number): boolean => {
+  const isActive = (line, item) => {
     return activeIndex.line === line && activeIndex.item === item;
   }
 
 
-    const getHorizontalIndexes = (line: number, item:number, symbol: number) => {
+    const getHorizontalIndexes = (line, item, symbol) => {
         let firstIndex = 0;
         let secIndex = items.value[line].length
 
@@ -54,12 +53,9 @@ const activeIndex = reactive({line: -1, item: -1})
         let indexes = items.value[line].slice(firstIndex, secIndex + 1).map((_, index) => index + firstIndex)
     
         let str = items.value[line].slice(firstIndex, secIndex + 1).join("").indexOf(generateWin(symbol))
-        
-        winningIndexes.value = indexes.splice(str, str + 5).map(item => [line, item]) 
-        console.log(winningIndexes)
     }
 
-    const onSquareClick = (line: number, item: number) => {
+    const onSquareClick = (line, item) => {
         if(activeIndex.line === line && activeIndex.item === item){
             onSecondClick(line, item)
         }
@@ -71,21 +67,22 @@ const activeIndex = reactive({line: -1, item: -1})
 
 
 
-    const onSecondClick = (line:number, item: number) => {
-        if(items.value[line][item]){
+    const onSecondClick = (line, item) => {
+        if(items.value[line][item].value){
             return
         }
 
         count.value++
         if(count.value % 2 === 1){
-            items.value[line][item] = 1
+            items.value[line][item].value = 1
         } else{
-            items.value[line][item] = 2
+            items.value[line][item].value = 2
         }
-        const symbol: number = items.value[line][item];
+        const symbol = items.value[line][item].value;
 
         const winData = checkWin(line, item, symbol);
 
+        
         if(!winData){
             return;
         }
@@ -96,8 +93,9 @@ const activeIndex = reactive({line: -1, item: -1})
         plays.value++;
     }
 
-    const checkWin = (line: number, item: number, symbol: number): string | null => {
+    const checkWin = (line, item, symbol)=> {
       if(checkHorizontal(line, item, symbol)){
+        console.log("horiz")
         return "horizontal";
       }
 
@@ -118,7 +116,7 @@ const activeIndex = reactive({line: -1, item: -1})
     }
 
 
-    const generateWin = (symbol: number) => {
+    const generateWin = (symbol) => {
         let str = []
         for(let i=0; i<5; i++){
             str.push(symbol)
@@ -126,7 +124,7 @@ const activeIndex = reactive({line: -1, item: -1})
         return str.join("")
     }
 
-    const checkHorizontal = (line: number, item: number, symbol: number) => {
+    const checkHorizontal = (line, item, symbol) => {
         let firstIndex = 0;
         let secIndex = items.value[line].length
 
@@ -138,10 +136,11 @@ const activeIndex = reactive({line: -1, item: -1})
         }
 
         let str = items.value[line].slice(firstIndex, secIndex + 1).join("")
+        console.log(str)
         return str.includes(generateWin(symbol))
     }
 
-    const checkVertical = (line: number, item: number, symbol: number) => {
+    const checkVertical = (line, item, symbol) => {
         let firstIndex = 0;
         let secIndex = items.value.length; 
 
@@ -156,7 +155,7 @@ const activeIndex = reactive({line: -1, item: -1})
         return str.includes(generateWin(symbol))
     }
 
-    const checkDiagonalLeft = (l: number, i: number, symbol:number=1) => {
+    const checkDiagonalLeft = (l, i, symbol=1) => {
         let firstIndex = {line: l - Math.min(l, i), item: i - Math.min(l, i)}
         if(l > 3 && i > 3){
             firstIndex.line = l - 4;
@@ -174,7 +173,7 @@ const activeIndex = reactive({line: -1, item: -1})
         return str.includes(generateWin(symbol))
     }
 
-    const checkDiagonalRight = (l: number, i: number, symbol: number=1): boolean => {
+    const checkDiagonalRight = (l, i, symbol=1) => {
         const firstIndex = {
             line: l - Math.min(l, items.value[0].length - 1),
             item: i + Math.min(l, items.value[0].length - 1)
@@ -200,7 +199,7 @@ const activeIndex = reactive({line: -1, item: -1})
     }
 
 
-    const items = ref<number[][]>([])
+    const items = ref([])
     const count = ref(0)
     const won = ref(false);
 
@@ -231,7 +230,7 @@ const activeIndex = reactive({line: -1, item: -1})
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
         <div v-for="(item, itemIndex) in line">
-          <Square :value="item" :active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)" :won="winningIndexes.includes([lineIndex, itemIndex])" :rotation="45"/>
+          <Square :data="items[lineIndex][itemIndex]" :data.active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)"/>
         </div>
       </div>
     </div>

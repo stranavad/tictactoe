@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import Symbol from './Symbol.vue';
-const {value, active} = defineProps<{ value: number, active: boolean, won: boolean, rotation: number}>()
+const {data} = defineProps(['data'])
 
 const emit = defineEmits(['trigger'])
 
 const onClick = () => {
-    if(value){
+    if(data.value){
       return;
     }
     emit("trigger")
@@ -15,9 +15,9 @@ const onClick = () => {
 
 
 <template>
-    <div :class="{'square-div': true,'active': active}" @click="onClick">
-      <Symbol :value="value" :active="active"/>
-      <div v-if="won" class="won-line" :style="`transform: rotate(${rotation}deg)`" />
+    <div :class="{'square-div': true,'active': data.active}" @click="onClick">
+      <Symbol :value="data.value" data.active="active"/>
+      <div v-if="data.won" class="won-line" :style="`transform: rotate(${data.rotation}deg)`" />
     </div>
 </template>
 
