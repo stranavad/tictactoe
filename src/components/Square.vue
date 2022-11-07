@@ -17,7 +17,7 @@ const onClick = () => {
 <template>
     <div :class="{'square-div': true,'active': data.active}" @click="onClick">
       <Symbol :value="data.value" data.active="active"/>
-      <div v-if="data.won" class="won-line" :style="`transform: rotate(${data.rotation}deg)`" />
+      <div v-if="data.won" class="won-line" />
     </div>
 </template>
 
@@ -30,7 +30,7 @@ const onClick = () => {
     position: absolute;
     margin: auto;
     transform-origin: center;
-    border-radius: 8px; 
+    border-radius: 8px;
   }
 
   

@@ -39,21 +39,22 @@ const activeIndex = reactive({line: -1, item: -1})
   }
 
 
-    const getHorizontalIndexes = (line, item, symbol) => {
-        let firstIndex = 0;
-        let secIndex = items.value[line].length
+    // const getHorizontalIndexes = (line, item, symbol) => {
+    //     let firstIndex = 0;
+    //     let secIndex = items.value[line].length
 
-        if(item > 3){
-            firstIndex = item - 4;
-        }
-        if(items.value[line].length > item + 4){
-            secIndex = item + 4;
-        }
+    //     if(item > 3){
+    //         firstIndex = item - 4;
+    //     }
+    //     if(items.value[line].length > item + 4){
+    //         secIndex = item + 4;
+    //     }
 
-        let indexes = items.value[line].slice(firstIndex, secIndex + 1).map((_, index) => index + firstIndex)
+    //     let indexes = items.value[line].slice(firstIndex, secIndex + 1).map((_, index) => index + firstIndex)
     
-        let str = items.value[line].slice(firstIndex, secIndex + 1).join("").indexOf(generateWin(symbol))
-    }
+    //     let str = items.value[line].slice(firstIndex, secIndex + 1).join("").indexOf(generateWin(symbol))
+    // }
+
 
     const onSquareClick = (line, item) => {
         if(activeIndex.line === line && activeIndex.item === item){
@@ -82,29 +83,50 @@ const activeIndex = reactive({line: -1, item: -1})
 
         const winData = checkWin(line, item, symbol);
 
-        
+
         if(!winData){
             return;
         }
 
         score[symbol === 1 ? 1 : 2]++;
-        getHorizontalIndexes(line, item, symbol);
+        // getHorizontalIndexes(line, item, symbol);
         // won.value = true;
         plays.value++;
     }
 
     const checkWin = (line, item, symbol)=> {
       if(checkHorizontal(line, item, symbol)){
-        console.log("horiz")
-        return "horizontal";
+        let num1 = 0;
+        let num2 = 0;
+        for(let i=0; i<5; i++){
+          for(let j=0; j<4; j++){
+            if(items.value[line][item].value === items.value[line][item + j].value){
+              num1++;
+            }
+            if(items.value[line][item].value === items.value[line][item - j].value){
+              num2++;
+            }
+          }
+        }
+
+        for(let k=0; k<num1; k++){
+          if(num1 + num2 >= 5){
+            items.value[line][item + k].won = true;
+          }
+        }
+        for(let l=0; l<num2; l++){
+          if(num1 + num2 >= 5){
+            items.value[line][item - l].won = true;
+          }
+        }
       }
 
       if(checkVertical(line, item, symbol)){
-        return "vertical";
+        return;
       }
 
       if(checkDiagonalLeft(line, item, symbol)){
-        return "diagonalLeft";
+        return ""
       }
 
       if(checkDiagonalRight(line, item, symbol)){
@@ -135,8 +157,8 @@ const activeIndex = reactive({line: -1, item: -1})
             secIndex = item + 4;
         }
 
-        let str = items.value[line].slice(firstIndex, secIndex + 1).join("")
-        console.log(str)
+        let str = items.value[line].slice(firstIndex, secIndex + 1).map(item => item.value).join("")
+
         return str.includes(generateWin(symbol))
     }
 
@@ -151,7 +173,8 @@ const activeIndex = reactive({line: -1, item: -1})
             secIndex = line + 4;
         }
 
-        let str = items.value.slice(firstIndex, secIndex + 1).map((array) => array[item]).join("")
+        
+        let str = items.value.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
         return str.includes(generateWin(symbol))
     }
 
@@ -169,7 +192,8 @@ const activeIndex = reactive({line: -1, item: -1})
             lastIndex.item = i + 4;
         }
 
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item]).join("");
+        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
+
         return str.includes(generateWin(symbol))
     }
 
@@ -194,7 +218,7 @@ const activeIndex = reactive({line: -1, item: -1})
             lastIndex.item = i - 4;
         }
 
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
+        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
         return str.includes(generateWin(symbol))
     }
 
