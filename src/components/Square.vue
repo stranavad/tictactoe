@@ -28,6 +28,7 @@ const onClick = () => {
     width: 56px;
     background-color: white;
     position: absolute;
+    z-index: 10;
     margin: auto;
     transform-origin: center;
     border-radius: 8px;
@@ -39,6 +40,7 @@ const onClick = () => {
         width: 35px;
         height: 35px;
         display: flex;
+        position: relative;
         justify-content: center;
         align-items: center;
 

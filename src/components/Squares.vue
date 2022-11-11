@@ -96,41 +96,91 @@ const activeIndex = reactive({line: -1, item: -1})
 
     const checkWin = (line, item, symbol)=> {
       if(checkHorizontal(line, item, symbol)){
-        let num1 = 0;
-        let num2 = 0;
-        for(let i=0; i<5; i++){
-          for(let j=0; j<4; j++){
-            if(items.value[line][item].value === items.value[line][item + j].value){
-              num1++;
-            }
-            if(items.value[line][item].value === items.value[line][item - j].value){
-              num2++;
-            }
-          }
+        let firstIndex = 0;
+        let secIndex = items.value[line].length
+
+        if(item > 3){
+            firstIndex = item - 4;
+        }
+        if(items.value[line].length > item + 4){
+            secIndex = item + 4;
         }
 
-        for(let k=0; k<num1; k++){
-          if(num1 + num2 >= 5){
-            items.value[line][item + k].won = true;
-          }
-        }
-        for(let l=0; l<num2; l++){
-          if(num1 + num2 >= 5){
-            items.value[line][item - l].won = true;
-          }
-        }
+        let str = items.value[line].slice(firstIndex, secIndex + 1).map(item => item.value).join("")
+        const index = str.indexOf(generateWin(symbol));
+        items.value[line].slice(firstIndex + index, firstIndex + index + 5).map(item => {
+          item.won = true;
+        })
       }
 
       if(checkVertical(line, item, symbol)){
-        return;
+        let firstIndex = 0;
+        let secIndex = items.value.length; 
+
+        if(line > 3){
+            firstIndex = line - 4;
+        }
+        if(items.value.length > line + 4){
+            secIndex = line + 4;
+        }
+
+        
+        let str = items.value.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
+        const index =  str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex + index, firstIndex + index + 5).map(line => {
+          line[item].won = true;
+        })
+        
+
       }
 
       if(checkDiagonalLeft(line, item, symbol)){
-        return ""
+        let firstIndex = {line: line - Math.min(line, item), item: item - Math.min(line, item)}
+        if(line > 3 && item > 3){
+            firstIndex.line = line - 4;
+            firstIndex.item = item - 4
+        }
+
+        const lastIndex = {line: line + Math.min(items.value[0].length - item, items.value.length - line), item: item + Math.min(items.value[0].length - item, items.value.length - line)}
+
+        if(items.value[0].length > item + 4 && items.value.length > line + 4){
+            lastIndex.line = line + 4;
+            lastIndex.item = item + 4;
+        }
+
+        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
+        const index = str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
+          line[itemIndex + (firstIndex.item + index)].won = true;
+        })
       }
 
       if(checkDiagonalRight(line, item, symbol)){
-        return "diagonalRight";
+        const firstIndex = {
+            line: line - Math.min(line, items.value[0].length - 1),
+            item: item + Math.min(line, items.value[0].length - 1)
+        }
+
+        if(line > 3 && items.value[0].length - 3 > 3){
+            firstIndex.line = line - 4;
+            firstIndex.item = item + 4;
+        }
+
+        const lastIndex = {
+            line: line + Math.min(item, items.value.length - line),
+            item: item - Math.min(item, items.value.length - line),
+        }
+
+        if(item > 3 && items.value.length - line > 3){
+            lastIndex.line = line + 4;
+            lastIndex.item = item - 4;
+        }
+
+        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
+        const index = str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
+          line[(firstIndex.item + index) - itemIndex].won = true;
+        })
       }
       else{
         return null;
