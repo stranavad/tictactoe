@@ -1,34 +1,22 @@
 <script setup>
-import {ref, onMounted, reactive, computed} from 'vue'
-import Square from './Square.vue'
-import Symbol from "./Symbol.vue";
+  import {ref, onMounted, reactive, computed} from 'vue'
+  import Square from './Square.vue'
+  import Symbol from "./Symbol.vue";
 
-const {rows, cols} = defineProps(['rows', 'cols'])
-const score = reactive({1: 0, 2: 0});
-const players = ref([1, 2]);
-const plays = ref(0);
+  const {rows, cols} = defineProps(['rows', 'cols'])
+  const score = reactive({1: 0, 2: 0});
+  const players = ref([1, 2]);
+  const plays = ref(0);
 
-const activeIndex = reactive({line: -1, item: -1})
+  const activeIndex = reactive({line: -1, item: -1})
 
-  const setBoard = (clearScore) => {
-    if(clearScore){
-      count.value = {};
-      plays.value = {};
-      score[1] = {};
-      score[2] = {};
-    }
-    won.value = false;
-    count.value = plays.value % 2;
-    activeIndex.line = -1;
-    activeIndex.item = -1;
-    // count.value = 0;
-    items.value = [];
+  const setBoard = () => {
     for(let i=0; i<rows; i++){
       let array = [];
       for(let j=0; j<cols; j++){
-        array.push({value: 0, active: false, won: false, rotation: 45})
+        array.push({value: 0, active: false, won: false, rotation: 0})
       }
-      items.value.push(array)
+      items.value.splice(items.value[0], items.value[length - 1], array)
     }
   }
 
@@ -38,32 +26,17 @@ const activeIndex = reactive({line: -1, item: -1})
     return activeIndex.line === line && activeIndex.item === item;
   }
 
+  const onSquareClick = (line, item) => {
+      if(activeIndex.line === line && activeIndex.item === item){
+          onSecondClick(line, item)
+          items.value[line][item].active = false;
+      } else{
+        items.value[line][item].active = true;
+      }
 
-    // const getHorizontalIndexes = (line, item, symbol) => {
-    //     let firstIndex = 0;
-    //     let secIndex = items.value[line].length
-
-    //     if(item > 3){
-    //         firstIndex = item - 4;
-    //     }
-    //     if(items.value[line].length > item + 4){
-    //         secIndex = item + 4;
-    //     }
-
-    //     let indexes = items.value[line].slice(firstIndex, secIndex + 1).map((_, index) => index + firstIndex)
-    
-    //     let str = items.value[line].slice(firstIndex, secIndex + 1).join("").indexOf(generateWin(symbol))
-    // }
-
-
-    const onSquareClick = (line, item) => {
-        if(activeIndex.line === line && activeIndex.item === item){
-            onSecondClick(line, item)
-        }
-
-        activeIndex.line = line
-        activeIndex.item = item
-    }
+      activeIndex.line = line
+      activeIndex.item = item
+  }
 
 
 
@@ -80,7 +53,6 @@ const activeIndex = reactive({line: -1, item: -1})
             items.value[line][item].value = 2
         }
         const symbol = items.value[line][item].value;
-
         const winData = checkWin(line, item, symbol);
 
 
@@ -110,7 +82,10 @@ const activeIndex = reactive({line: -1, item: -1})
         const index = str.indexOf(generateWin(symbol));
         items.value[line].slice(firstIndex + index, firstIndex + index + 5).map(item => {
           item.won = true;
+          item.rotation = 0;
         })
+
+        alert("You won!!!!!")
       }
 
       if(checkVertical(line, item, symbol)){
@@ -128,10 +103,11 @@ const activeIndex = reactive({line: -1, item: -1})
         let str = items.value.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
         const index =  str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex + index, firstIndex + index + 5).map(line => {
+          line[item].rotation = 90;
           line[item].won = true;
         })
-        
 
+        alert("You won!!!!!")
       }
 
       if(checkDiagonalLeft(line, item, symbol)){
@@ -152,7 +128,10 @@ const activeIndex = reactive({line: -1, item: -1})
         const index = str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
           line[itemIndex + (firstIndex.item + index)].won = true;
+          line[itemIndex + (firstIndex.item + index)].rotation = 45;
         })
+
+        alert("You won!!!!!")
       }
 
       if(checkDiagonalRight(line, item, symbol)){
@@ -179,8 +158,11 @@ const activeIndex = reactive({line: -1, item: -1})
         let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
         const index = str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
-          line[(firstIndex.item + index) - itemIndex].won = true;
+          line[(firstIndex.item - index) - itemIndex].won = true;
+          line[(firstIndex.item - index) - itemIndex].rotation = 135;
         })
+
+        alert("You won!!!!!")
       }
       else{
         return null;
@@ -288,10 +270,10 @@ const activeIndex = reactive({line: -1, item: -1})
 </script>
 
 <template>
-  <div v-if="won" class="win-container">
+  <!-- <div v-if="won" class="win-container">
     <h3>You've won</h3>
-    <button @click="setBoard(false)">New game</button>
-  </div>
+    <button @click="setBoard()">New game</button>
+  </div> -->
   <div class="main-container">
     <div class="toolbox">
       <div class="playing">
@@ -299,7 +281,7 @@ const activeIndex = reactive({line: -1, item: -1})
         <Symbol :value="currentlyPlaying" :active="false" :size="'small'"/>
       </div>
       <div class="score"><Symbol :value="1" :size="'small'"/><text class="score-text">{{score[1]}} - {{score[2]}}</text><Symbol :value="2" :size="'small'"/></div>
-      <button @click="setBoard(true)">CLEAR BOARD</button>
+      <button @click="setBoard()">CLEAR BOARD</button>
     </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">

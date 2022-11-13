@@ -17,13 +17,16 @@ const onClick = () => {
 <template>
     <div :class="{'square-div': true,'active': data.active}" @click="onClick">
       <Symbol :value="data.value" data.active="active"/>
-      <div v-if="data.won" class="won-line" />
+      <div v-if="data.won && data.rotation == 0" class="won-line-hor" />
+      <div v-if="data.won && data.rotation == 90" class="won-line-ver" />
+      <div v-if="data.won && data.rotation == 45" class="won-line-dileft" />
+      <div v-if="data.won && data.rotation == 135" class="won-line-diright" />
     </div>
 </template>
 
 <style scoped>
 
-  .won-line {
+  .won-line-hor {
     height: 4px;
     width: 56px;
     background-color: white;
@@ -32,6 +35,40 @@ const onClick = () => {
     margin: auto;
     transform-origin: center;
     border-radius: 8px;
+    rotate: 0deg;
+  }
+  .won-line-ver {
+    height: 4px;
+    width: 56px;
+    background-color: white;
+    position: absolute;
+    z-index: 10;
+    margin: auto;
+    transform-origin: center;
+    border-radius: 8px;
+    rotate: 90deg;
+  }
+  .won-line-dileft {
+    height: 4px;
+    width: 56px;
+    background-color: white;
+    position: absolute;
+    z-index: 10;
+    margin: auto;
+    transform-origin: center;
+    border-radius: 8px;
+    rotate: 45deg;
+  }
+  .won-line-diright {
+    height: 4px;
+    width: 56px;
+    background-color: white;
+    position: absolute;
+    z-index: 10;
+    margin: auto;
+    transform-origin: center;
+    border-radius: 8px;
+    rotate: 135deg;
   }
 
   
