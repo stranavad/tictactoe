@@ -6,18 +6,21 @@
   const {rows, cols} = defineProps(['rows', 'cols'])
   const score = reactive({1: 0, 2: 0});
   const players = ref([1, 2]);
-  const plays = ref(0);
+  let plays = ref(0);
 
-  const activeIndex = reactive({line: -1, item: -1})
+  let activeIndex = reactive({line: -1, item: -1})
 
-  const setBoard = () => {
+  const setBoard = (line, item) => {
+    items.value = [];
     for(let i=0; i<rows; i++){
-      let array = [];
+      let arr = [];
       for(let j=0; j<cols; j++){
-        array.push({value: 0, active: false, won: false, rotation: 0})
+        arr.push({value: 0, active: false, won: false, rotation: 0})
       }
-      items.value.splice(items.value[0], items.value[length - 1], array)
+      items.value.push(arr)
     }
+    activeIndex.line = -1;
+    activeIndex.item = -1;
   }
 
   onMounted(setBoard)
@@ -281,7 +284,7 @@
         <Symbol :value="currentlyPlaying" :active="false" :size="'small'"/>
       </div>
       <div class="score"><Symbol :value="1" :size="'small'"/><text class="score-text">{{score[1]}} - {{score[2]}}</text><Symbol :value="2" :size="'small'"/></div>
-      <button @click="setBoard()">CLEAR BOARD</button>
+      <button @click="setBoard(lineIndex, itemIndex)">CLEAR BOARD</button>
     </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
