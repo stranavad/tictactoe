@@ -2,261 +2,142 @@
   import {ref, onMounted, reactive, computed} from 'vue'
   import Square from './Square.vue'
   import Symbol from "./Symbol.vue";
+  import {checkHorizontalCallback, checkVerticalCallback, checkDiagonalLeftCallback, checkDiagonalRightCallback} from '../checks';
 
   const {rows, cols} = defineProps(['rows', 'cols'])
   const score = reactive({1: 0, 2: 0});
   const players = ref([1, 2]);
   let plays = ref(0);
+  let lastItem = reactive({line: -1, item: -1});
 
-  let activeIndex = reactive({line: -1, item: -1})
 
-  const setBoard = (line, item) => {
-    items.value = [];
-    for(let i=0; i<rows; i++){
-      let arr = [];
-      for(let j=0; j<cols; j++){
-        arr.push({value: 0, active: false, won: false, rotation: 0})
+  const setBoard = (clear=false) => {
+    if(!clear){
+      items.value = [];
+      for(let i=0; i<rows; i++){
+        let arr = [];
+        for(let j=0; j<cols; j++){
+          arr.push({value: 0, active: false, won: false, rotation: 0})
+        }
+        items.value.push(arr)
       }
-      items.value.push(arr)
+    } else {
+      items.value.map((line) => {
+        line.map((item) => {
+          item.value = 0;
+          item.active = false;
+          item.won = false;
+          item.rotation = 0;
+        })
+      })
+      count.value = 0;
     }
-    activeIndex.line = -1;
-    activeIndex.item = -1;
   }
 
   onMounted(setBoard)
 
-  const isActive = (line, item) => {
-    return activeIndex.line === line && activeIndex.item === item;
-  }
 
   const onSquareClick = (line, item) => {
-      if(activeIndex.line === line && activeIndex.item === item){
-          onSecondClick(line, item)
-          items.value[line][item].active = false;
-      } else{
-        items.value[line][item].active = true;
+    if(won.value){
+      return;
+    }
+    if(items.value[line][item].active){
+      onSecondClick(line, item)
+      items.value[line][item].active = false;
+    }
+    else{
+      for(let i=0; i<rows; i++){
+        for(let j=0; j<cols; j++){
+          items.value[i][j].active = false;
+        }
       }
-
-      activeIndex.line = line
-      activeIndex.item = item
+      items.value[line][item].active = true;
+    }
+    
+    plays.value = 0;
+    lastItem.line = line;
+    lastItem.item = item;
   }
 
 
 
 
     const onSecondClick = (line, item) => {
-        if(items.value[line][item].value){
-            return
-        }
 
         count.value++
         if(count.value % 2 === 1){
-            items.value[line][item].value = 1
+            items.value[line][item].value = 1;
         } else{
-            items.value[line][item].value = 2
+            items.value[line][item].value = 2;
         }
         const symbol = items.value[line][item].value;
         const winData = checkWin(line, item, symbol);
 
 
-        if(!winData){
+        if(!won.value){
             return;
         }
 
+
+
         score[symbol === 1 ? 1 : 2]++;
-        // getHorizontalIndexes(line, item, symbol);
-        // won.value = true;
         plays.value++;
     }
 
     const checkWin = (line, item, symbol)=> {
-      if(checkHorizontal(line, item, symbol)){
-        let firstIndex = 0;
-        let secIndex = items.value[line].length
 
-        if(item > 3){
-            firstIndex = item - 4;
-        }
-        if(items.value[line].length > item + 4){
-            secIndex = item + 4;
-        }
-
-        let str = items.value[line].slice(firstIndex, secIndex + 1).map(item => item.value).join("")
+      checkHorizontalCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value[line].slice(firstIndex, secondIndex + 1).map(item => item.value).join("")
         const index = str.indexOf(generateWin(symbol));
         items.value[line].slice(firstIndex + index, firstIndex + index + 5).map(item => {
           item.won = true;
           item.rotation = 0;
         })
+        won.value = true;
+      })
 
-        alert("You won!!!!!")
-      }
-
-      if(checkVertical(line, item, symbol)){
-        let firstIndex = 0;
-        let secIndex = items.value.length; 
-
-        if(line > 3){
-            firstIndex = line - 4;
-        }
-        if(items.value.length > line + 4){
-            secIndex = line + 4;
-        }
-
-        
-        let str = items.value.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
+      !won.value && checkVerticalCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value.slice(firstIndex, secondIndex + 1).map(array => array[item].value).join("")
         const index =  str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex + index, firstIndex + index + 5).map(line => {
           line[item].rotation = 90;
           line[item].won = true;
         })
+        won.value = true
+      })
 
-        alert("You won!!!!!")
-      }
-
-      if(checkDiagonalLeft(line, item, symbol)){
-        let firstIndex = {line: line - Math.min(line, item), item: item - Math.min(line, item)}
-        if(line > 3 && item > 3){
-            firstIndex.line = line - 4;
-            firstIndex.item = item - 4
-        }
-
-        const lastIndex = {line: line + Math.min(items.value[0].length - item, items.value.length - line), item: item + Math.min(items.value[0].length - item, items.value.length - line)}
-
-        if(items.value[0].length > item + 4 && items.value.length > line + 4){
-            lastIndex.line = line + 4;
-            lastIndex.item = item + 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
+      !won.value && checkDiagonalLeftCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        console.log(firstIndex);
+        console.log(secondIndex);
+        let str = items.value.slice(firstIndex.line, secondIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
         const index = str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
           line[itemIndex + (firstIndex.item + index)].won = true;
           line[itemIndex + (firstIndex.item + index)].rotation = 45;
         })
+        won.value = true;
+      })
 
-        alert("You won!!!!!")
-      }
-
-      if(checkDiagonalRight(line, item, symbol)){
-        const firstIndex = {
-            line: line - Math.min(line, items.value[0].length - 1),
-            item: item + Math.min(line, items.value[0].length - 1)
-        }
-
-        if(line > 3 && items.value[0].length - 3 > 3){
-            firstIndex.line = line - 4;
-            firstIndex.item = item + 4;
-        }
-
-        const lastIndex = {
-            line: line + Math.min(item, items.value.length - line),
-            item: item - Math.min(item, items.value.length - line),
-        }
-
-        if(item > 3 && items.value.length - line > 3){
-            lastIndex.line = line + 4;
-            lastIndex.item = item - 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
+      !won.value && checkDiagonalRightCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value.slice(firstIndex.line, secondIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
         const index = str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
           line[(firstIndex.item - index) - itemIndex].won = true;
           line[(firstIndex.item - index) - itemIndex].rotation = 135;
         })
-
-        alert("You won!!!!!")
-      }
-      else{
-        return null;
-      }
+        won.value = true;
+      })
     }
+        
 
 
-    const generateWin = (symbol) => {
+      const generateWin = (symbol) => {
         let str = []
         for(let i=0; i<5; i++){
             str.push(symbol)
         }
         return str.join("")
     }
-
-    const checkHorizontal = (line, item, symbol) => {
-        let firstIndex = 0;
-        let secIndex = items.value[line].length
-
-        if(item > 3){
-            firstIndex = item - 4;
-        }
-        if(items.value[line].length > item + 4){
-            secIndex = item + 4;
-        }
-
-        let str = items.value[line].slice(firstIndex, secIndex + 1).map(item => item.value).join("")
-
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkVertical = (line, item, symbol) => {
-        let firstIndex = 0;
-        let secIndex = items.value.length; 
-
-        if(line > 3){
-            firstIndex = line - 4;
-        }
-        if(items.value.length > line + 4){
-            secIndex = line + 4;
-        }
-
-        
-        let str = items.value.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkDiagonalLeft = (l, i, symbol=1) => {
-        let firstIndex = {line: l - Math.min(l, i), item: i - Math.min(l, i)}
-        if(l > 3 && i > 3){
-            firstIndex.line = l - 4;
-            firstIndex.item = i - 4
-        }
-
-        const lastIndex = {line: l + Math.min(items.value[0].length - i, items.value.length - l), item: i + Math.min(items.value[0].length - i, items.value.length - l)}
-
-        if(items.value[0].length > i+ 4 && items.value.length > l + 4){
-            lastIndex.line = l + 4;
-            lastIndex.item = i + 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
-
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkDiagonalRight = (l, i, symbol=1) => {
-        const firstIndex = {
-            line: l - Math.min(l, items.value[0].length - 1),
-            item: i + Math.min(l, items.value[0].length - 1)
-        }
-
-        if(l > 3 && items.value[0].length - 3 > 3){
-            firstIndex.line = l - 4;
-            firstIndex.item = i + 4;
-        }
-
-        const lastIndex = {
-            line: l + Math.min(i, items.value.length - l),
-            item: i - Math.min(i, items.value.length - l),
-        }
-
-        if(i > 3 && items.value.length - l > 3){
-            lastIndex.line = l + 4;
-            lastIndex.item = i - 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
-        return str.includes(generateWin(symbol))
-    }
-
 
     const items = ref([])
     const count = ref(0)
@@ -273,10 +154,6 @@
 </script>
 
 <template>
-  <!-- <div v-if="won" class="win-container">
-    <h3>You've won</h3>
-    <button @click="setBoard()">New game</button>
-  </div> -->
   <div class="main-container">
     <div class="toolbox">
       <div class="playing">
@@ -284,7 +161,7 @@
         <Symbol :value="currentlyPlaying" :active="false" :size="'small'"/>
       </div>
       <div class="score"><Symbol :value="1" :size="'small'"/><text class="score-text">{{score[1]}} - {{score[2]}}</text><Symbol :value="2" :size="'small'"/></div>
-      <button @click="setBoard(lineIndex, itemIndex)">CLEAR BOARD</button>
+      <button @click="setBoard(true)">CLEAR BOARD</button>
     </div>
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">

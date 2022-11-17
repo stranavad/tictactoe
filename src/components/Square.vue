@@ -5,6 +5,7 @@ const {data} = defineProps(['data'])
 const emit = defineEmits(['trigger'])
 
 const onClick = () => {
+
     if(data.value){
       return;
     }
