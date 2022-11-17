@@ -53,6 +53,7 @@
       }
       items.value[line][item].active = true;
     }
+
     
     plays.value = 0;
     lastItem.line = line;
@@ -73,12 +74,9 @@
         const symbol = items.value[line][item].value;
         const winData = checkWin(line, item, symbol);
 
-
         if(!won.value){
             return;
         }
-
-
 
         score[symbol === 1 ? 1 : 2]++;
         plays.value++;
@@ -263,8 +261,8 @@
   border: 3px solid white;
 }
 
-    .line{
-    display: flex;
-    }
+.line{
+display: flex;
+}
 
 </style>

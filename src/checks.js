@@ -35,7 +35,6 @@ export const checkVerticalCallback = (line, item, symbol, items, callback) => {
     if(items.length > line + 4){
         secIndex = line + 4;
     }
-
     
     let str = items.slice(firstIndex, secIndex + 1).map(array => array[item].value).join("")
     
@@ -47,7 +46,7 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
     let firstIndex = {line: line - Math.min(line, item), item: item - Math.min(line, item)}
     if(line > 3 && item > 3){
         firstIndex.line = line - 4;
-        firstIndex.item = item - 4
+        firstIndex.item = item - 4;
     }
 
     const lastIndex = {line: line + Math.min(items[0].length - item, items.length - line), item: item + Math.min(items[0].length - item, items.length - line)}
@@ -57,7 +56,7 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
         lastIndex.item = item + 4;
     }
 
-    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
+    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item]).join("");
     str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
 }
 
@@ -83,6 +82,6 @@ export const checkDiagonalRightCallback = (line, item, symbol, items, callback) 
         lastIndex.item = item - 4;
     }
 
-    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
+    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
     str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
 }
