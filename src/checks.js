@@ -44,32 +44,39 @@ export const checkVerticalCallback = (line, item, symbol, items, callback) => {
 
 export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) => {
     let firstIndex = {line: line - Math.min(line, item), item: item - Math.min(line, item)}
-    if(line > 3 && item > 3){
+    if(Math.min(line, item) < 4){
+        firstIndex.line = line - Math.min(line, item)
+        firstIndex.item = item - Math.min(line, item)
+    } else{
         firstIndex.line = line - 4;
         firstIndex.item = item - 4;
     }
 
     const lastIndex = {line: line + Math.min(items[0].length - item, items.length - line), item: item + Math.min(items[0].length - item, items.length - line)}
-
-    if(items[0].length > item + 4 && items.length > line + 4){
+    if(Math.max(line, item) > items[0].length - 4){
+        let len = Math.min(items[0].length-Math.max(line, item))
+        lastIndex.line = line + len
+        lastIndex.item = item + len
+    } else{
         lastIndex.line = line + 4;
         lastIndex.item = item + 4;
     }
 
-    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item]).join("");
+    let str = items.slice(firstIndex.line, lastIndex.line + 1).map(array => array[firstIndex.item].value).join("");
+
     str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
 }
 
 
 export const checkDiagonalRightCallback = (line, item, symbol, items, callback) => {
-    const firstIndex = {
-        line: line - Math.min(line, items[0].length - 1),
-        item: item + Math.min(line, items[0].length - 1)
-    }
-
-    if(line > 3 && items[0].length - 3 > 3){
-        firstIndex.line = line - 4;
-        firstIndex.item = item + 4;
+    const firstIndex = {line: line - Math.min(line, items[0].length - 1), item: item - Math.min(line, items[0].length - 1)}
+    let len = Math.min(items[0].length-1-line, item);
+    if(len < 4){
+        firstIndex.line = line + len
+        firstIndex.item = item - len
+    } else{
+        firstIndex.line = line + 4;
+        firstIndex.item = item - 4;
     }
 
     const lastIndex = {
@@ -77,11 +84,16 @@ export const checkDiagonalRightCallback = (line, item, symbol, items, callback) 
         item: item - Math.min(item, items.length - line),
     }
 
-    if(item > 3 && items.length - line > 3){
-        lastIndex.line = line + 4;
-        lastIndex.item = item - 4;
+    len = Math.min(items[0].length-1-item, line);
+    if(len < 4){
+        lastIndex.line = line - len
+        lastIndex.item = item + len
+    } else{
+        lastIndex.line = line - 4;
+        lastIndex.item = item + 4;
     }
 
-    let str = items.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
+    let str = items.slice(firstIndex.line, lastIndex.line + 1).map(array => array[firstIndex.item].value).join("");
+
     str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
 }
