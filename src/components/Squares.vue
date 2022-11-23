@@ -105,8 +105,6 @@
       })
 
       !won.value && checkDiagonalLeftCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
-        console.log(firstIndex);
-        console.log(secondIndex);
         let str = items.value.slice(firstIndex.line, secondIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
         const index = str.indexOf(generateWin(symbol))
         items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
