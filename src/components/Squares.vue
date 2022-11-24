@@ -12,6 +12,7 @@
 
 
   const setBoard = (clear=false) => {
+    won.value = false;
     if(!clear){
       items.value = [];
       for(let i=0; i<rows; i++){
@@ -65,21 +66,21 @@
 
     const onSecondClick = (line, item) => {
 
-        count.value++
-        if(count.value % 2 === 1){
-            items.value[line][item].value = 1;
-        } else{
-            items.value[line][item].value = 2;
-        }
-        const symbol = items.value[line][item].value;
-        const winData = checkWin(line, item, symbol);
+      count.value++
+      if(count.value % 2 === 1){
+          items.value[line][item].value = 1;
+      } else{
+          items.value[line][item].value = 2;
+      }
+      const symbol = items.value[line][item].value;
+      checkWin(line, item, symbol);
 
-        if(!won.value){
-            return;
-        }
+      if(!won.value){
+          return;
+      }
 
-        score[symbol === 1 ? 1 : 2]++;
-        plays.value++;
+      score[symbol === 1 ? 1 : 2]++;
+      plays.value++;
     }
 
     const checkWin = (line, item, symbol)=> {

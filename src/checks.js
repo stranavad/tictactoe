@@ -53,11 +53,11 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
         firstIndex.item = item - 4;
     }
 
-    const lastIndex = {line: line + Math.min(items[0].length - item, items.length - line), item: item + Math.min(items[0].length - item, items.length - line)}
+    const lastIndex = {line: line, item: item}
     if(Math.max(line, item) > items[0].length - 4){
-        let len = Math.min(items[0].length-1-Math.max(line, item))
-        lastIndex.line = line + len;
-        lastIndex.item = item + len;
+        let len = items[0].length-1-Math.max(line, item)
+        lastIndex.line = line + len-1;
+        lastIndex.item = item + len-1;
     } else{
         lastIndex.line = line + 4;
         lastIndex.item = item + 4;
