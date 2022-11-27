@@ -63,7 +63,7 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
         lastIndex.item = item + 4;
     }
 
-    let str = items.slice(firstIndex.line, lastIndex.line).map((array, index) => array[firstIndex.item + index].value).join("");
+    let str = items.slice(firstIndex.line, lastIndex.line).map((array, index) => array[index + firstIndex.item].value).join("");
 
     str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
 }

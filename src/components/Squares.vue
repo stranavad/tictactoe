@@ -8,8 +8,8 @@
   const score = reactive({1: 0, 2: 0});
   const players = ref([1, 2]);
   let plays = ref(0);
-  let lastItem = reactive({line: -1, item: -1});
-
+  let lastItem = reactive({line: 0, item: 0});
+  let lastScore = score;
 
   const setBoard = (clear=false) => {
     won.value = false;
@@ -78,7 +78,6 @@
       if(!won.value){
           return;
       }
-
       score[symbol === 1 ? 1 : 2]++;
       plays.value++;
     }
@@ -124,6 +123,11 @@
         })
         won.value = true;
       })
+      if(won.value){
+        if(score[1] != lastScore[1] || score[2] != lastScore[2]){
+
+        }
+      }
     }
         
 
@@ -254,8 +258,8 @@
 .line-container{
   display: flex;
   flex-direction: column;
-  height: 90vw;
-  width: 90vw;
+  height: auto;
+  width: auto;
   overflow: scroll;
   border: 3px solid white;
 }
