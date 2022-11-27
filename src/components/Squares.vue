@@ -186,6 +186,7 @@
   height: 100%;
   font-weight: bolder;
   line-height: 1em;
+  margin-top: 3px;
 }
 
 .main-container {
