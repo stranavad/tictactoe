@@ -268,4 +268,11 @@
 display: flex;
 }
 
+@media only screen and (max-width: 768px) {
+  [class*="line-container"] {
+    height: 90vw;
+    width: 90vw;
+  }
+}
+
 </style>
