@@ -6,7 +6,6 @@
 
   const {rows, cols} = defineProps(['rows', 'cols'])
   const score = reactive({1: 0, 2: 0});
-  const players = ref([1, 2]);
   let plays = ref(0);
   let lastItem = reactive({line: 0, item: 0});
   let lastScore = score;
@@ -54,33 +53,20 @@
       }
       items.value[line][item].active = true;
     }
-
-    
-    plays.value = 0;
     lastItem.line = line;
     lastItem.item = item;
   }
-
-
-
-
-    const onSecondClick = (line, item) => {
-
-      count.value++
-      if(count.value % 2 === 1){
-          items.value[line][item].value = 1;
-      } else{
-          items.value[line][item].value = 2;
-      }
-      const symbol = items.value[line][item].value;
-      checkWin(line, item, symbol);
-
-      if(!won.value){
-          return;
-      }
-      score[symbol === 1 ? 1 : 2]++;
-      plays.value++;
-    }
+  const onSecondClick = (line, item) => {
+    count.value++
+    items.value[line][item].value = count.value % 2 === 1 ? 1 : 2
+    const symbol = items.value[line][item].value;
+    checkWin(line, item, symbol);
+    if(!won.value){
+        return;
+    } 
+    score[symbol === 1 ? 1 : 2]++;
+    plays.value++;
+  }
 
     const checkWin = (line, item, symbol)=> {
 
@@ -146,9 +132,9 @@
 
     const currentlyPlaying = computed(() => {
       if(!count.value){
-        return 1;
+        return plays.value % 2 + 1;
       }
-      return count.value % 2 ? 2 : 1;
+      return (count.value + (score[1] + score[2]) % 2) % 2 ? 2 : 1;
     })
 
 
@@ -259,10 +245,12 @@
 .line-container{
   display: flex;
   flex-direction: column;
-  height: auto;
+  height: auto; 
   width: auto;
   overflow: scroll;
   border: 3px solid white;
+  max-width: 35 * 15px;
+  max-height: 35 * 15px;
 }
 
 .line{
@@ -271,8 +259,8 @@ display: flex;
 
 @media only screen and (max-width: 768px) {
   [class*="line-container"] {
-    height: 90vw;
-    width: 90vw;
+    max-height: min(90vw, 35*15px);;
+    max-width: min(90vw, 35*15px);
   }
 }
 
