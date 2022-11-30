@@ -59,9 +59,10 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
         lastIndex.line = line + len-1;
         lastIndex.item = item + len-1;
     } else{
-        lastIndex.line = line + 4;
-        lastIndex.item = item + 4;
+        lastIndex.line = line + 4-1;
+        lastIndex.item = item + 4-1;
     }
+    console.log(firstIndex, lastIndex)
 
     let str = items.slice(firstIndex.line, lastIndex.line).map((array, index) => array[index + firstIndex.item].value).join("");
 
