@@ -6,6 +6,14 @@ export const generateWin = (symbol) => {
     return str.join("")
 }
 
+export const generateWinSec = (symbol) => {
+    let str = []
+    for(let i=0; i<4; i++){
+        str.push(symbol)
+    }
+    return str.join("")
+}
+
 
 export const checkHorizontalCallback = (line, item, symbol, items, callback) => {
     let firstIndex = 0;
@@ -54,19 +62,26 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
     }
 
     const lastIndex = {line: line, item: item}
-    if(Math.max(line, item) > items[0].length - 4){
+    if(Math.max(line, item) > items[0].length-1 - 4){
         let len = items[0].length-1-Math.max(line, item)
-        lastIndex.line = line + len-1;
-        lastIndex.item = item + len-1;
+        lastIndex.line = line + len;
+        lastIndex.item = item + len;
     } else{
-        lastIndex.line = line + 4-1;
-        lastIndex.item = item + 4-1;
+        lastIndex.line = line + 5;
+        lastIndex.item = item + 5;
     }
-    console.log(firstIndex, lastIndex)
+
+
+    console.log(generateWin(symbol) )
+
 
     let str = items.slice(firstIndex.line, lastIndex.line).map((array, index) => array[index + firstIndex.item].value).join("");
 
-    str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
+    if(item === 14){
+        str.includes(generateWinSec(symbol)) && callback(firstIndex, lastIndex);    
+    } else{
+        str.includes(generateWin(symbol)) && callback(firstIndex, lastIndex);
+    }
 }
 
 
