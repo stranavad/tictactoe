@@ -42,7 +42,7 @@ defineProps({
   margin: auto;
   height: 6px;
   width: 30px;
-  background-color: #ffffffdd;
+  background-color: blue;
   transform-origin: center;
   border-radius: 5px;
 }
@@ -95,7 +95,7 @@ defineProps({
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  border: 4px solid #ffffffdd;;
+  border: 4px solid red;
 }
 
 </style>

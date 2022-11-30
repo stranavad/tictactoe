@@ -84,6 +84,6 @@ const onClick = () => {
 
     }
     .active {
-      background-color: #ffffffcc;
+      background-color: lightgray;
     }
 </style>

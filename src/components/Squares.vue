@@ -9,7 +9,7 @@
   let plays = ref(0);
   let lastItem = reactive({line: 0, item: 0});
   let lastScore = score;
-
+  
   const setBoard = (clear=false) => {
     won.value = false;
     if(!clear){
