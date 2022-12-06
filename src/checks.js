@@ -72,8 +72,6 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
     }
 
 
-
-
     let str = items.slice(firstIndex.line, lastIndex.line).map((array, index) => array[index + firstIndex.item].value).join("");
 
     if(item === 14){
