@@ -58,8 +58,12 @@
   }
   const onSecondClick = (line, item) => {
     count.value++
-    items.value[line][item].value = count.value % 2 === 1 ? 1 : 2
-    const symbol = items.value[line][item].value;
+    if(!count.value){
+      items.value[line][item].value = plays.value % 2;
+    } else{
+      items.value[line][item].value = (count.value + (score[1] + score[2]) % 2) % 2 ? 1 : 2;
+    } 
+    const symbol = items.value[line][item].value
     checkWin(line, item, symbol);
     if(!won.value){
         return;
@@ -88,6 +92,7 @@
           line[item].won = true;
         })
         won.value = true
+        
       })
 
       !won.value && checkDiagonalLeftCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
@@ -109,11 +114,6 @@
         })
         won.value = true;
       })
-      if(won.value){
-        if(score[1] != lastScore[1] || score[2] != lastScore[2]){
-
-        }
-      }
     }
         
 

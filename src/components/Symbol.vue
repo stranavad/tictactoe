@@ -61,36 +61,6 @@ defineProps({
   border-color: #000000;
 }
 
-
-/*
-.cross {
-  background: #ffffffdd;
-  height: 28px;
-  position: relative;
-  width: 6px;
-  transform: rotate(45deg);
-  border-radius: 10px;
-}
-
-.cross.active, .cross.active:after{
-  background: #000000;
-}
-
-.circle.active {
-  border-color: #000000;
-}
-
-.cross:after {
-  background: #ffffffdd;
-  content: "";
-  height: 6px;
-  left: -11px;
-  position: absolute;
-  top: 11px;
-  width: 28px;
-  border-radius: 10px;
-}
- */
 .circle {
   height: 20px;
   width: 20px;
