@@ -67,8 +67,14 @@ export const checkDiagonalLeftCallback = (line, item, symbol, items, callback) =
         lastIndex.line = line + len;
         lastIndex.item = item + len;
     } else{
-        lastIndex.line = line + 5;
-        lastIndex.item = item + 5;
+        if(item >= 10){
+            lastIndex.line = line + 4;
+            lastIndex.item = item + 4;
+        }
+         else{
+            lastIndex.line = line + 5;
+            lastIndex.item = item + 5;
+        }
     }
 
 
