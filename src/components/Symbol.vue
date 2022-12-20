@@ -42,7 +42,7 @@ defineProps({
   margin: auto;
   height: 6px;
   width: 30px;
-  background-color: #ffffffdd;
+  background-color: blue;
   transform-origin: center;
   border-radius: 5px;
 }
@@ -61,41 +61,11 @@ defineProps({
   border-color: #000000;
 }
 
-
-/*
-.cross {
-  background: #ffffffdd;
-  height: 28px;
-  position: relative;
-  width: 6px;
-  transform: rotate(45deg);
-  border-radius: 10px;
-}
-
-.cross.active, .cross.active:after{
-  background: #000000;
-}
-
-.circle.active {
-  border-color: #000000;
-}
-
-.cross:after {
-  background: #ffffffdd;
-  content: "";
-  height: 6px;
-  left: -11px;
-  position: absolute;
-  top: 11px;
-  width: 28px;
-  border-radius: 10px;
-}
- */
 .circle {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  border: 4px solid #ffffffdd;;
+  border: 4px solid red;
 }
 
 </style>

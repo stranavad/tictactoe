@@ -1,92 +1,124 @@
-<script setup lang="ts">
-import {ref, onMounted, reactive, computed} from 'vue'
-import Square from './Square.vue'
-import Symbol from "./Symbol.vue";
+<script setup>
+  import {ref, onMounted, reactive, computed} from 'vue'
+  import Square from './Square.vue'
+  import Symbol from "./Symbol.vue";
+  import {checkHorizontalCallback, checkVerticalCallback, checkDiagonalLeftCallback, checkDiagonalRightCallback} from '../checks';
 
-const {rows, cols} = defineProps<{rows: number, cols: number}>()
-const score = reactive({1: 0, 2: 0});
-const players = ref([1, 2]);
-const plays = ref(0);
-
-const activeIndex = reactive({line: -1, item: -1})
-
-  const setBoard = (clearScore: boolean=false) => {
-    if(clearScore){
-      count.value = 0;
-      plays.value = 0;
-      score[1] = 0;
-      score[2] = 0;
-    }
+  const {rows, cols} = defineProps(['rows', 'cols'])
+  const score = reactive({1: 0, 2: 0});
+  let plays = ref(0);
+  let lastItem = reactive({line: 0, item: 0});
+  let lastScore = score;
+  
+  const setBoard = (clear=false) => {
     won.value = false;
-    count.value = plays.value % 2;
-    activeIndex.line = -1;
-    activeIndex.item = -1;
-    // count.value = 0;
-    items.value = [];
-    for(let i=0; i<rows; i++){
-      let array = [];
-      for(let j=0; j<cols; j++){
-        array.push(0)
+    if(!clear){
+      items.value = [];
+      for(let i=0; i<rows; i++){
+        let arr = [];
+        for(let j=0; j<cols; j++){
+          arr.push({value: 0, active: false, won: false, rotation: 0})
+        }
+        items.value.push(arr)
       }
-      items.value.push(array)
+    } else {
+      items.value.map((line) => {
+        line.map((item) => {
+          item.value = 0;
+          item.active = false;
+          item.won = false;
+          item.rotation = 0;
+        })
+      })
+      count.value = 0;
     }
   }
 
   onMounted(setBoard)
 
-  const isActive = (line: number, item: number): boolean => {
-    return activeIndex.line === line && activeIndex.item === item;
+
+  const onSquareClick = (line, item) => {
+    if(won.value){
+      return;
+    }
+    if(items.value[line][item].active){
+      onSecondClick(line, item)
+      items.value[line][item].active = false;
+    }
+    else{
+      for(let i=0; i<rows; i++){
+        for(let j=0; j<cols; j++){
+          items.value[i][j].active = false;
+        }
+      }
+      items.value[line][item].active = true;
+    }
+    lastItem.line = line;
+    lastItem.item = item;
+  }
+  const onSecondClick = (line, item) => {
+    count.value++
+    if(!count.value){
+      items.value[line][item].value = plays.value % 2;
+    } else{
+      items.value[line][item].value = (count.value + (score[1] + score[2]) % 2) % 2 ? 1 : 2;
+    } 
+    const symbol = items.value[line][item].value
+    checkWin(line, item, symbol);
+    if(!won.value){
+        return;
+    } 
+    score[symbol === 1 ? 1 : 2]++;
+    plays.value++;
   }
 
+    const checkWin = (line, item, symbol)=> {
 
-    const onSquareClick = (line: number, item: number) => {
-        if(activeIndex.line === line && activeIndex.item === item){
-            onSecondClick(line, item)
-        }
+      checkHorizontalCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value[line].slice(firstIndex, secondIndex + 1).map(item => item.value).join("")
+        const index = str.indexOf(generateWin(symbol));
+        items.value[line].slice(firstIndex + index, firstIndex + index + 5).map(item => {
+          item.won = true;
+          item.rotation = 0;
+        })
+        won.value = true;
+      })
 
-        activeIndex.line = line
-        activeIndex.item = item
+      !won.value && checkVerticalCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value.slice(firstIndex, secondIndex + 1).map(array => array[item].value).join("")
+        const index =  str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex + index, firstIndex + index + 5).map(line => {
+          line[item].rotation = 90;
+          line[item].won = true;
+        })
+        won.value = true
+        
+      })
+
+      !won.value && checkDiagonalLeftCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value.slice(firstIndex.line, secondIndex.line + 1).map((array, index) => array[index + firstIndex.item].value).join("");
+        const index = str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
+          line[itemIndex + (firstIndex.item + index)].won = true;
+          line[itemIndex + (firstIndex.item + index)].rotation = 45;
+        })
+        won.value = true;
+      })
+
+      !won.value && checkDiagonalRightCallback(line, item, symbol, items.value, (firstIndex, secondIndex) => {
+        let str = items.value.slice(firstIndex.line, secondIndex.line + 1).map((array, index) => array[firstIndex.item - index].value).join("");
+        const index = str.indexOf(generateWin(symbol))
+        items.value.slice(firstIndex.line + index, firstIndex.line + index + (str.length - str.split("").reverse().join("").indexOf(generateWin(symbol)) - index)).map((line, itemIndex) => {
+          line[(firstIndex.item - index) - itemIndex].won = true;
+          line[(firstIndex.item - index) - itemIndex].rotation = 135;
+        })
+        won.value = true;
+      })
     }
+        
 
 
-    const onSecondClick = (line:number, item: number) => {
-        if(items.value[line][item]){
-            return
-        }
-
-        count.value++
-        if(count.value % 2 === 1){
-            items.value[line][item] = 1
-        } else{
-            items.value[line][item] = 2
-        }
-        const symbol: number = items.value[line][item];
-
-        if(checkWin(line, item, symbol)){
-          score[symbol === 1 ? 1 : 2]++;
-          won.value = true;
-          plays.value++;
-        }
-    }
-
-    const checkWin = (line: number, item: number, symbol: number) => {
-      if(checkHorizontal(line, item, symbol)){
-        return true;
-      }
-
-      if(checkVertical(line, item, symbol)){
-        return true;
-      }
-
-      if(checkDiagonalLeft(line, item, symbol)){
-        return true;
-      }
-
-      return checkDiagonalRight(line, item, symbol)
-    }
-
-
-    const generateWin = (symbol: number) => {
+      const generateWin = (symbol) => {
         let str = []
         for(let i=0; i<5; i++){
             str.push(symbol)
@@ -94,99 +126,21 @@ const activeIndex = reactive({line: -1, item: -1})
         return str.join("")
     }
 
-    const checkHorizontal = (line: number, item: number, symbol: number) => {
-        let firstIndex = 0;
-        let secIndex = items.value[line].length
-
-        if(item > 3){
-            firstIndex = item - 4;
-        }
-        if(items.value[line].length > item + 4){
-            secIndex = item + 4;
-        }
-
-        let str = items.value[line].slice(firstIndex, secIndex + 1).join("")
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkVertical = (line: number, item: number, symbol: number) => {
-        let firstIndex = 0;
-        let secIndex = items.value.length;
-
-        if(line > 3){
-            firstIndex = line - 4;
-        }
-        if(items.value.length > line + 4){
-            secIndex = line + 4;
-        }
-
-        let str = items.value.slice(firstIndex, secIndex + 1).map((array) => array[item]).join("")
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkDiagonalLeft = (l: number, i: number, symbol:number=1) => {
-        let firstIndex = {line: l - Math.min(l, i), item: i - Math.min(l, i)}
-        if(l > 3 && i > 3){
-            firstIndex.line = l - 4;
-            firstIndex.item = i - 4
-        }
-
-        const lastIndex = {line: l + Math.min(items.value[0].length - i, items.value.length - l), item: i + Math.min(items.value[0].length - i, items.value.length - l)}
-
-        if(items.value[0].length > i+ 4 && items.value.length > l + 4){
-            lastIndex.line = l + 4;
-            lastIndex.item = i + 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[index + firstIndex.item]).join("");
-        return str.includes(generateWin(symbol))
-    }
-
-    const checkDiagonalRight = (l: number, i: number, symbol: number=1): boolean => {
-        const firstIndex = {
-            line: l - Math.min(l, items.value[0].length - 1),
-            item: i + Math.min(l, items.value[0].length - 1)
-        }
-
-        if(l > 3 && items.value[0].length - 3 > 3){
-            firstIndex.line = l - 4;
-            firstIndex.item = i + 4;
-        }
-
-        const lastIndex = {
-            line: l + Math.min(i, items.value.length - l),
-            item: i - Math.min(i, items.value.length - l),
-        }
-
-        if(i > 3 && items.value.length - l > 3){
-            lastIndex.line = l + 4;
-            lastIndex.item = i - 4;
-        }
-
-        let str = items.value.slice(firstIndex.line, lastIndex.line + 1).map((array, index) => array[firstIndex.item - index]).join("");
-        return str.includes(generateWin(symbol))
-    }
-
-
-    const items = ref<number[][]>([])
+    const items = ref([])
     const count = ref(0)
     const won = ref(false);
 
     const currentlyPlaying = computed(() => {
       if(!count.value){
-        return 1;
+        return plays.value % 2 + 1;
       }
-      return count.value % 2 ? 2 : 1;
+      return (count.value + (score[1] + score[2]) % 2) % 2 ? 2 : 1;
     })
 
 
 </script>
 
 <template>
-  <div v-if="won" class="win-container">
-    <h3>You've won</h3>
-    <button @click="setBoard(false)">New game</button>
-  </div>
   <div class="main-container">
     <div class="toolbox">
       <div class="playing">
@@ -199,7 +153,7 @@ const activeIndex = reactive({line: -1, item: -1})
     <div class="line-container">
       <div v-for="(line, lineIndex) in items" class="line">
         <div v-for="(item, itemIndex) in line">
-          <Square :value="item" :active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)"/>
+          <Square :data="items[lineIndex][itemIndex]" :data.active="isActive(lineIndex, itemIndex)" @trigger="onSquareClick(lineIndex, itemIndex)"/>
         </div>
       </div>
     </div>
@@ -210,7 +164,6 @@ const activeIndex = reactive({line: -1, item: -1})
 
 .score {
   display: flex;
-  /*align-items: first;*/
 }
 
 .score-text {
@@ -219,6 +172,7 @@ const activeIndex = reactive({line: -1, item: -1})
   height: 100%;
   font-weight: bolder;
   line-height: 1em;
+  margin-top: 3px;
 }
 
 .main-container {
@@ -291,14 +245,23 @@ const activeIndex = reactive({line: -1, item: -1})
 .line-container{
   display: flex;
   flex-direction: column;
-  height: 90vw;
-  width: 90vw;
+  height: auto; 
+  width: auto;
   overflow: scroll;
   border: 3px solid white;
+  max-width: 35 * 15px;
+  max-height: 35 * 15px;
 }
 
-    .line{
-    display: flex;
-    }
+.line{
+display: flex;
+}
+
+@media only screen and (max-width: 768px) {
+  [class*="line-container"] {
+    max-height: min(90vw, 35*15px);;
+    max-width: min(90vw, 35*15px);
+  }
+}
 
 </style>
